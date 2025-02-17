@@ -1,5 +1,74 @@
 from tkinter import *
 from tkinter import ttk
+
+
+class Task:
+    PRIORITY_MAP = {"High": 3, "Medium": 2, "Low": 1}
+
+    def __init__(self, description, priority):
+        self.description = description
+        self.priority = priority
+
+    def get_priority_value(self):
+        return Task.PRIORITY_MAP[self.priority]
+
+
+class TreeNode:
+    def __init__(self, task):
+        self.task = task
+        self.left = None
+        self.right = None
+
+
+class TaskManager:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, task):
+        if not self.root:
+            self.root = TreeNode(task)
+        else:
+            self._insert(self.root, task)
+
+    def _insert(self, node, task):
+        if task.get_priority_value() > node.task.get_priority_value():
+            if node.left:
+                self._insert(node.left, task)
+            else:
+                node.left = TreeNode(task)
+        else:
+            if node.right:
+                self._insert(node.right, task)
+            else:
+                node.right = TreeNode(task)
+
+    def delete(self, description):
+        self.root = self._delete(self.root, description.lower())
+
+    def _delete(self, node, description):
+        if not node:
+            return None
+        node_description = node.task.description.lower()
+        if description < node_description:
+            node.left = self._delete(node.left, description)
+        elif description > node_description:
+            node.right = self._delete(node.right, description)
+        else:
+            if not node.left:
+                return node.right
+            elif not node.right:
+                return node.left
+            successor = self._find_min(node.right)
+            node.task = successor.task
+            node.right = self._delete(node.right, successor.task.description.lower())
+        return node
+
+    def _find_min(self, node):
+        while node.left:
+            node = node.left
+        return node
+
+
 class Node:
     def __init__(self, description, priority, state):
         self.description = description
@@ -9,6 +78,7 @@ class Node:
 
     def __repr__(self):
         return f"{self.description}, {self.priority}, {self.state}"
+
 
 class HashTable:
     def __init__(self, size=10):
@@ -67,14 +137,6 @@ class HashTable:
                     f"Task: {description}\n"
                     f"Priority: {priority}\n"
                     f"State: {state}"), None, None
-    def get(self, description):
-        i = self.hash(description)
-        curr = self.items[i]
-        while curr:
-            if curr.description.lower() == description.lower():
-                return curr  # Return the Node object
-            curr = curr.next
-        return "Task not found!"  # Return a string when task doesn't exist
 
     def delete(self, description):
         i = self.hash(description)
@@ -91,21 +153,31 @@ class HashTable:
                 curr.next = curr.next.next  # Correctly update the link to skip the deleted node
                 return
             curr = curr.next
-def rehashing(self):
-    old_list = self.items
-    self.items = [None for _ in range(self.size * self.resize_factor)]  # Create a new list with increased size
-    old_size = self.size  # Store the old size
-    self.size *= self.resize_factor  # Update the size based on resize factor
-    self.n_items = 0  # Reset item count
 
-    for i in old_list:
-        cur_node = i
-        while cur_node is not None:
-            des = cur_node.description  # Correct attribute name
-            priority = cur_node.priority  # Correct attribute name
-            state = cur_node.state
-            self.insert(des, priority, state)  # Reinsert items
-            cur_node = cur_node.next
+    def get(self, description):
+        i = self.hash(description)
+        curr = self.items[i]
+        while curr:
+            if curr.description.lower() == description.lower():
+                return curr  # Return the Node object
+            curr = curr.next
+        return "Task not found!"  # Return a string when task doesn't exist
+
+    def rehashing(self):
+        old_list = self.items
+        self.items = [None for _ in range(self.size * self.resize_factor)]  # Create a new list with increased size
+        old_size = self.size  # Store the old size
+        self.size *= self.resize_factor  # Update the size based on resize factor
+        self.n_items = 0  # Reset item count
+
+        for i in old_list:
+            cur_node = i
+            while cur_node is not None:
+                des = cur_node.description  # Correct attribute name
+                priority = cur_node.priority  # Correct attribute name
+                state = cur_node.state
+                self.insert(des, priority, state)  # Reinsert items
+                cur_node = cur_node.next
 class App(Tk):
     def __init__(self):
         super().__init__()
@@ -113,14 +185,17 @@ class App(Tk):
         self.resizable(False, False)
         self.title("SAS To-Do List")
 
-        # Initialize the hash table
+        # Initialize the hash table and BST
         self.task_table = HashTable()
+        self.task_tree = TaskManager()
 
         # Dummy images and variable initialization
         self.image_lbl = PhotoImage(file=r"background.png")
         self.var_enter_task = StringVar()
         self.image_add = PhotoImage(file=r"Add_button.png")
         self.image_search = PhotoImage(file=r"search_button~2.png")
+        self.image_delete = PhotoImage(file=r"Delete_button.png")
+        self.image_priority = PhotoImage(file=r"priority_button.png")
 
         # Create a label to display the image and place it in the main window
         lbl = Label(self, image=self.image_lbl)
@@ -168,6 +243,17 @@ class App(Tk):
                                 highlightbackground="white", bd=0, highlightcolor="white", command=self.search_task)
         self.search_bt.place(x=382, y=290, width=110, height=40)
 
+        # Delete button
+        self.delete_bt = Button(self, image=self.image_delete, relief="flat", highlightthickness=3,
+                                highlightbackground="white", bd=0, highlightcolor="white", command=self.delete_task)
+        self.delete_bt.place(x=382, y=345, width=110, height=40)
+
+        # Priority button
+        self.priority_bt = Button(self, image=self.image_priority, relief="flat", highlightthickness=3,
+                                  highlightbackground="white", bd=0, highlightcolor="white",
+                                  command=self.show_tasks_by_priority)
+        self.priority_bt.place(x=382, y=520, width=110, height=40)
+
     def hide_placeholder(self, event):
         self.placeholder_lbl.place_forget()
 
@@ -183,10 +269,6 @@ class App(Tk):
         if combobox.get() == placeholder:
             combobox.set('')
 
-    def set_placeholder(self, combobox, placeholder):
-        if not combobox.get():
-            combobox.set(placeholder)
-
     def style_combobox(self, combobox):
         style = ttk.Style()
         style.configure('TCombobox',
@@ -195,14 +277,25 @@ class App(Tk):
                         relief='solid',  # Solid border for better appearance
                         font=("Arial", 10))
 
+
+    def set_placeholder(self, combobox, placeholder):
+        if not combobox.get():
+            combobox.set(placeholder)
+
     def add_task(self):
         task_description = self.ent_task.get()
-        # Use default values if not selected
-        priority = self.priority_var.get() or "Low"  # Default to Low if not selected
+        priority = self.priority_var.get() or "Low" # Get the selected priority
         state = self.state_var.get() or "Uncompleted"  # Default to Uncompleted if not selected
 
+        # Ensure priority is valid, default to "Low" if not selected
+        if priority == "Select Priority":
+            priority = "Low"
         if task_description:
+            # Add to HashTable
             message, old_priority, old_state = self.task_table.insert(task_description, priority, state)
+            # Add to BST
+            task = Task(task_description, priority)
+            self.task_tree.insert(task)
             self.show_message(message)
             self.ent_task.delete(0, END)  # Clear the entry after adding
             self.show_placeholder(None)  # Reset placeholder visibility
@@ -226,6 +319,40 @@ class App(Tk):
         else:
             self.show_message("Please enter a task to search.")
 
+    def delete_task(self):
+        task_description = self.ent_task.get()
+        if task_description:
+            # Delete from HashTable
+            self.task_table.delete(task_description)
+            # Delete from BST
+            self.task_tree.delete(task_description)
+            self.show_message(f"Task '{task_description}' deleted successfully!")
+            self.ent_task.delete(0, END)  # Clear the entry after deleting
+            self.show_placeholder(None)  # Reset placeholder visibility
+            self.priority_combobox.set("Select Priority")  # Reset ComboBox
+        else:
+            self.show_message("Please enter a task to delete.")
+
+    def show_tasks_by_priority(self):
+        """Display tasks sorted by priority."""
+        sorted_tasks = self._inorder_traversal(self.task_tree.root)
+        if sorted_tasks:
+            message = "Tasks sorted by priority (High to Low):\n"
+            for task in sorted_tasks:
+                message += f"Task: {task.description}, Priority: {task.priority}\n"
+        else:
+            message = "No tasks found!"
+        self.show_message(message)
+
+    def _inorder_traversal(self, node):
+        """Helper method to perform inorder traversal of the BST."""
+        tasks = []
+        if node:
+            tasks = self._inorder_traversal(node.left)
+            tasks.append(node.task)
+            tasks += self._inorder_traversal(node.right)
+        return tasks
+
     def show_message(self, message):
         """Show a simple message box with a light blue background."""
         message_window = Toplevel(self)
@@ -248,6 +375,7 @@ class App(Tk):
         x = self.winfo_x() + (self.winfo_width() // 2) - (300 // 2)
         y = self.winfo_y() + (self.winfo_height() // 2) - (150 // 2)
         message_window.geometry(f"+{x}+{y}")  # Position the window
+
 
 # Start the Tkinter main loop
 my_app = App()
