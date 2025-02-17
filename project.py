@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-
 class Node:
     def __init__(self, description, priority, state):
         self.description = description
@@ -76,6 +75,37 @@ class HashTable:
                 return curr  # Return the Node object
             curr = curr.next
         return "Task not found!"  # Return a string when task doesn't exist
+
+    def delete(self, description):
+        i = self.hash(description)
+        curr = self.items[i]
+
+        # Check if the first node is the one to delete
+        if curr and curr.description.lower() == description.lower():
+            self.items[i] = curr.next  # Remove the first node
+            return
+
+        # Traverse the list to find the node to delete
+        while curr and curr.next:
+            if curr.next.description.lower() == description.lower():
+                curr.next = curr.next.next  # Correctly update the link to skip the deleted node
+                return
+            curr = curr.next
+def rehashing(self):
+    old_list = self.items
+    self.items = [None for _ in range(self.size * self.resize_factor)]  # Create a new list with increased size
+    old_size = self.size  # Store the old size
+    self.size *= self.resize_factor  # Update the size based on resize factor
+    self.n_items = 0  # Reset item count
+
+    for i in old_list:
+        cur_node = i
+        while cur_node is not None:
+            des = cur_node.description  # Correct attribute name
+            priority = cur_node.priority  # Correct attribute name
+            state = cur_node.state
+            self.insert(des, priority, state)  # Reinsert items
+            cur_node = cur_node.next
 class App(Tk):
     def __init__(self):
         super().__init__()
