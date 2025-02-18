@@ -196,6 +196,7 @@ class App(Tk):
         self.image_search = PhotoImage(file=r"search_button~2.png")
         self.image_delete = PhotoImage(file=r"Delete_button.png")
         self.image_priority = PhotoImage(file=r"priority_button.png")
+        self.image_show = PhotoImage(file=r"show_bt.png")
 
         # Create a label to display the image and place it in the main window
         lbl = Label(self, image=self.image_lbl)
@@ -253,6 +254,10 @@ class App(Tk):
                                   highlightbackground="white", bd=0, highlightcolor="white",
                                   command=self.show_tasks_by_priority)
         self.priority_bt.place(x=382, y=520, width=110, height=40)
+        # show button
+        self.show_bt = Button(self, image=self.image_show, relief="flat", highlightthickness=3,
+                                  highlightbackground="white", bd=0, highlightcolor="white",)
+        self.show_bt.place(x=382, y=575, width=110, height=40)
 
     def hide_placeholder(self, event):
         self.placeholder_lbl.place_forget()
@@ -269,6 +274,10 @@ class App(Tk):
         if combobox.get() == placeholder:
             combobox.set('')
 
+    def set_placeholder(self, combobox, placeholder):
+        if not combobox.get():
+            combobox.set(placeholder)
+
     def style_combobox(self, combobox):
         style = ttk.Style()
         style.configure('TCombobox',
@@ -276,11 +285,6 @@ class App(Tk):
                         borderwidth=2,
                         relief='solid',  # Solid border for better appearance
                         font=("Arial", 10))
-
-
-    def set_placeholder(self, combobox, placeholder):
-        if not combobox.get():
-            combobox.set(placeholder)
 
     def add_task(self):
         task_description = self.ent_task.get()
