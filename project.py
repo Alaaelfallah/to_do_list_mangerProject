@@ -267,7 +267,6 @@ class App(Tk):
                         relief='solid',
                         font=("Arial", 10))
 
-
     def add_task(self):
         task_description = self.ent_task.get()
         priority = self.priority_var.get() or "Low"
@@ -280,9 +279,9 @@ class App(Tk):
             existing_task_node = self.task_table.get(task_description)
 
             if isinstance(existing_task_node, Node):
-                # Update existing task
+
                 existing_task_node.priority = priority
-                existing_task_node.state = state  # Update state
+                existing_task_node.state = state
 
                 curr = self.task_table.items[self.task_table.hash(task_description)]
                 while curr:
@@ -308,6 +307,7 @@ class App(Tk):
             self.state_combobox.set("Select State")
         else:
             self.show_message("Please enter a task.")
+
     def search_task(self):
         task_description = self.ent_task.get()
         if task_description:
@@ -393,34 +393,25 @@ class App(Tk):
         message_window.geometry(f"+{x}+{y}")
 
     def show_message1(self, message):
-        """Show a simple message box with a light blue background."""
+
         message_window = Toplevel(self)
-        message_window.geometry("300x220")  # Set a fixed size for the message window
+        message_window.geometry("300x220")
         message_window.title("Message")
         message_window.resizable(False, False)
         message_window.iconbitmap('photo_icon/todo.ico')
 
-        # Create a Text widget for multiline results
         text_area = Text(message_window, wrap=WORD, bg="#ADD8E6", fg="#40799f", font=("Arial", 14), bd=0, height=9,
                          width=25)
-        text_area.insert(END, message)  # Insert the message
+        text_area.insert(END, message)
         scrollbar = Scrollbar(message_window, command=text_area.yview)
         scrollbar.pack(side=RIGHT, fill=Y)
-        text_area.config(state=DISABLED, yscrollcommand=scrollbar.set)  # Disable editing
-        text_area.place(x=10, y=9)  # Fill the window with padding
+        text_area.config(state=DISABLED, yscrollcommand=scrollbar.set)
+        text_area.place(x=10, y=9)
 
-        # Add a button to close the message window
-        # button = Button(message_window, text="OK", command=message_window.destroy,
-        # bg="#4CAF50", fg="white", font=("Arial", 10), relief="flat",
-        # padx=10, pady=5)
-        # button.place(x=125, y=160)  # Pack the button with padding
-
-        # Center the message window on the main window
         x = self.winfo_x() + (self.winfo_width() // 2) - (300 // 2)
         y = self.winfo_y() + (self.winfo_height() // 2) - (150 // 2)
-        message_window.geometry(f"+{x}+{y}")  # Position the window
+        message_window.geometry(f"+{x}+{y}")
 
 
-# Start the Tkinter main loop
 my_app = App()
 my_app.mainloop()
