@@ -7,9 +7,9 @@ A simple task management app built with Tkinter using three data structures:
 - Priority Queue – Manages tasks by priority  
 
 ## Features
-✅ Add, display, and manage tasks  
-✅ Search tasks efficiently  
-✅ Prioritize tasks  
+- Add, display, and manage tasks  
+- Search tasks efficiently  
+- Prioritize tasks  
 
 ## Installation
 1. Install dependencies:  
@@ -45,5 +45,5 @@ Usage
 2. Add tasks
 
 
-3. Search or manage priority
+3. Search or  delete or show or manage priority 
 
