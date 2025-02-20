@@ -45,5 +45,5 @@ Usage
 2. Add tasks
 
 
-3. Search or manage priority
+3. Search or  delete or show or manage priority 
 
