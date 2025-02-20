@@ -202,32 +202,32 @@ class App(Tk):
         lbl = Label(self, image=self.image_lbl)
         lbl.place(x=0, y=0, relwidth=1, relheight=1)
 
+
         # Create the entry widget
         self.ent_task = Entry(self, highlightthickness=3, highlightbackground="white", bd=0, relief="flat",
                               highlightcolor="white", font=("arial"), textvariable=self.var_enter_task)
-        self.ent_task.place(x=100, y=317, width=165)
 
-        # Create a placeholder label
-        self.placeholder_lbl = Label(self, text="Enter a Task", bg="white", fg="grey", font=("arial"))
-        self.placeholder_lbl.place(x=95, y=317, width=90)
+        self.ent_task.insert(0, 'Enter a Task')
+        self.ent_task.config(fg='Grey')
+        self.ent_task.place(x=100, y=353, width=165)
 
         # Bind events to manage the placeholder
-        self.ent_task.bind("<FocusIn>", self.hide_placeholder)
-        self.ent_task.bind("<FocusOut>", self.show_placeholder)
+        self.ent_task.bind("<FocusIn>", lambda event: self.hide_placeholder(event, self.ent_task))
+        self.ent_task.bind("<FocusOut>", lambda event: self.show_placeholder(event, self.ent_task))
         self.ent_task.bind("<KeyRelease>", self.check_placeholder)
 
         # Priority ComboBox with placeholder
         self.priority_var = StringVar()
         self.priority_combobox = ttk.Combobox(self, textvariable=self.priority_var, state="readonly")
         self.priority_combobox['values'] = ('High', 'Medium', 'Low')
-        self.priority_combobox.place(x=100, y=350, width=165)
+        self.priority_combobox.place(x=100, y=400, width=165)
         self.priority_combobox.set("Select Priority")  # Placeholder text
 
         # State ComboBox with placeholder
         self.state_var = StringVar()
         self.state_combobox = ttk.Combobox(self, textvariable=self.state_var, state="readonly")
         self.state_combobox['values'] = ('Completed', 'Uncompleted')
-        self.state_combobox.place(x=100, y=385, width=165)
+        self.state_combobox.place(x=100, y=450, width=165)
         self.state_combobox.set("Select State")  # Placeholder text
 
         # Style the ComboBoxes
@@ -254,17 +254,21 @@ class App(Tk):
                                   highlightbackground="white", bd=0, highlightcolor="white",
                                   command=self.show_tasks_by_priority)
         self.priority_bt.place(x=382, y=520, width=110, height=40)
+
         # show button
         self.show_bt = Button(self, image=self.image_show, relief="flat", highlightthickness=3,
                                   highlightbackground="white", bd=0, highlightcolor="white",)
         self.show_bt.place(x=382, y=575, width=110, height=40)
 
-    def hide_placeholder(self, event):
-        self.placeholder_lbl.place_forget()
+    def hide_placeholder(self, event, entry):
+        if entry.get() == "Enter a Task":
+            entry.delete(0, END)
+            entry.config(fg='black')
 
-    def show_placeholder(self, event):
+    def show_placeholder(self, event, entry):
         if self.ent_task.get() == "":
-            self.placeholder_lbl.place(x=95, y=317, width=90)
+            self.ent_task.insert(0, "Enter a Task")
+            self.ent_task.config(fg='grey')
 
     def check_placeholder(self, event):
         if self.ent_task.get() == "":
@@ -288,7 +292,7 @@ class App(Tk):
 
     def add_task(self):
         task_description = self.ent_task.get()
-        priority = self.priority_var.get() or "Low" # Get the selected priority
+        priority = self.priority_var.get() or "Low"  # Get the selected priority
         state = self.state_var.get() or "Uncompleted"  # Default to Uncompleted if not selected
 
         # Ensure priority is valid, default to "Low" if not selected
@@ -360,26 +364,28 @@ class App(Tk):
     def show_message(self, message):
         """Show a simple message box with a light blue background."""
         message_window = Toplevel(self)
-        message_window.geometry("300x150")  # Set a fixed size for the message window
+        message_window.geometry("300x220")  # Set a fixed size for the message window
         message_window.title("Message")
+        message_window.resizable(False, False)
+        message_window.iconbitmap('photo_icon/todo.ico')
 
         # Create a Text widget for multiline results
-        text_area = Text(message_window, wrap=WORD, bg="#ADD8E6", fg="#40799f", font=("Arial", 14), bd=0)
+        text_area = Text(message_window, wrap=WORD, bg="#ADD8E6", fg="#40799f", font=("Arial", 14), bd=0, height=9,
+                         width=25)
         text_area.insert(END, message)  # Insert the message
         text_area.config(state=DISABLED)  # Disable editing
-        text_area.pack(expand=True, fill=BOTH, padx=10, pady=(10, 0))  # Fill the window with padding
+        text_area.place(x=10, y=9)  # Fill the window with padding
 
         # Add a button to close the message window
         button = Button(message_window, text="OK", command=message_window.destroy,
                         bg="#4CAF50", fg="white", font=("Arial", 10), relief="flat",
                         padx=10, pady=5)
-        button.pack(pady=(10, 0))  # Pack the button with padding
+        button.place(x=125, y=160)  # Pack the button with padding
 
         # Center the message window on the main window
         x = self.winfo_x() + (self.winfo_width() // 2) - (300 // 2)
         y = self.winfo_y() + (self.winfo_height() // 2) - (150 // 2)
         message_window.geometry(f"+{x}+{y}")  # Position the window
-
 
 # Start the Tkinter main loop
 my_app = App()
